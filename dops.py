@@ -9,16 +9,16 @@ def shuffle_data(X, Y):
 
 def f_theta(theta, Siy, C):
 	d = len(S)
-	CS = set()
+	CS = []
 	v = np.zeros(d)
 
-	# calculate C(S)
-	for j in range(d):
-		if Siy[j] == 1:
-			CS = CS | set(C[j])
-
 	# calculate v
-	v = np.array([1 if j in CS else 0 for j in range(d)])
+	for j in range(d):
+		for i in range(d):
+			if Siy[i] == 1 and j in C[i]:
+				v[j] = 1
+				break
+
 	return np.dot(theta, v)
 
 
