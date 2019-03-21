@@ -3,7 +3,7 @@ from autograd import grad
 
 
 def shuffle_data(X, Y):
-	p = numpy.random.permutation(len(X))
+	p = np.random.permutation(len(X))
 	return X[p], Y[p]
 
 
@@ -28,7 +28,7 @@ def phi_theta(theta, Si, C, alphaz):
 
 def objective(theta, Ss, zs, C, alphazs):
 	res = 0
-	N, m = Ss.shape
+	N, m = len(Ss), len(Ss[0])
 	for i in range(N):
 		# calculate hinge loss
 		hinge_losses = np.zeros(m)
