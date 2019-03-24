@@ -8,13 +8,13 @@ def shuffle_data(X, Y):
 
 
 def f_theta(theta, Siy, C):
-	d = len(S)
+	d = len(Siy)
 	CS = []
 	v = np.zeros(d)
 
 	# calculate v
-	for j in range(d):
-		for i in range(d):
+	for j in range(d): # u
+		for i in range(d): # i
 			if Siy[i] == 1 and j in C[i]:
 				v[j] = 1
 				break
@@ -31,39 +31,40 @@ def objective(theta, Ss, zs, C, alphazs):
 	N, m = len(Ss), len(Ss[0])
 	for i in range(N):
 		# calculate hinge loss
-		hinge_losses = np.zeros(m)
+		max_loss = 0 
+		phi = phi_theta(theta, Ss[i], C, alphazs[i])
 		for y in range(m):
-			hinge_losses[y] = max((1 if y in alphazs[i] else 0) + f_theta(theta, Ss[i][y]) \
-							  - phi_theta(theta, Ss[i], zs[i], C), 0)
-		res += hinge_losses.max()
+			max_loss = max(max((1 if y in alphazs[i] else 0) + \
+				f_theta(theta, Ss[i][y], C) - phi, 0), max_loss)
+		res += max_loss
 	return res
 
 
-def gradient_descent(theta, Ss, zs, C, alphazs, eta=0.05, iters=1000, verbose=False):
+def gradient_descent(theta, Ss, zs, C, alphazs, eta=0.01, iters=1000, verbose=False):
 	gradident_fun = grad(objective)
 	for i in range(iters):
-		if verbose:
-			print(theta)
-
 		# gd
 		theta -= eta * gradident_fun(theta, Ss, zs, C, alphazs)
+		if verbose and i % 50 == 0:
+			print('Iter %d : %s' % (i, theta))
 
 	return theta
 
 
-def dops(X, Y, T, C, m, alpha, eta=0.05, iters=1000):
+def dops(X, Y, T, C, m, alpha, init, eta=0.01, iters=1000, verbose=False):
 	# config
 	M, d = X.shape
-	N = np.floor(M/m)
+	N = int(np.floor(M/m))
 	X, Y = shuffle_data(X, Y)
 	Ss = [X[i*m:(i+1)*m] for i in range(N)]
 	zs = [Y[i*m:(i+1)*m] for i in range(N)]
 	maxzs = [e.max() for e in zs] 
-	alphazs = [[i if e >= maxz/alpha for i, e in enumerate(z)] for z, maxz in zip(zs, maxzs)]
+	alphazs = [[i for i, e in enumerate(z) if e >= maxz/alpha] for z, maxz in zip(zs, maxzs)]
 
 	# optimize
 	# init theta = 0
-	theta = gradient_descent(np.zeros(d), Ss, zs, C, alphazs, eta, iters)
+	theta = gradient_descent(init, Ss, zs, C, alphazs, eta, iters, verbose)
 	
 	# get result
-	return max([f_theta(theta, t, C) for t in T])
+	res = [f_theta(theta, t, C) for t in T]
+	return res, theta, np.argmax(res)
