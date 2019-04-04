@@ -9,13 +9,13 @@ def shuffle_data(X, Y):
 
 def f_theta(theta, Siy, C):
 	d = len(Siy)
-	CS = []
-	v = np.zeros(d)
 
 	# calculate v
+	v = np.zeros(d)
 	for j in range(d): # u
 		for i in range(d): # i
-			if Siy[i] == 1 and j in C[i]:
+			if Siy[i] == 1 and C[i][j] == 1:
+			# if Siy[i] == 1 and j in C[i]:
 				v[j] = 1
 				break
 
@@ -40,18 +40,19 @@ def objective(theta, Ss, zs, C, alphazs):
 	return res
 
 
-def gradient_descent(theta, Ss, zs, C, alphazs, eta=0.01, iters=1000, verbose=False):
+def gradient_descent(theta, Ss, zs, C, alphazs, eta=0.01, iters=1000, print_every=10):
 	gradident_fun = grad(objective)
 	for i in range(iters):
-		# gd
+		# projected gd
 		theta -= eta * gradident_fun(theta, Ss, zs, C, alphazs)
-		if verbose and i % 50 == 0:
-			print('Iter %d : %s' % (i, theta))
+		theta[theta < 0] = 0
+		if print_every > 0 and (i+1) % print_every == 0:
+			print('Iter %d : %s' % (i+1, theta))
 
 	return theta
 
 
-def dops(X, Y, T, C, m, alpha, init, eta=0.01, iters=1000, verbose=False):
+def dops(X, Y, T, C, m, alpha, init, eta=0.01, iters=1000, print_every=10):
 	# config
 	M, d = X.shape
 	N = int(np.floor(M/m))
@@ -59,11 +60,10 @@ def dops(X, Y, T, C, m, alpha, init, eta=0.01, iters=1000, verbose=False):
 	Ss = [X[i*m:(i+1)*m] for i in range(N)]
 	zs = [Y[i*m:(i+1)*m] for i in range(N)]
 	maxzs = [e.max() for e in zs] 
-	alphazs = [[i for i, e in enumerate(z) if e >= maxz/alpha] for z, maxz in zip(zs, maxzs)]
+	alphazs = [[i for i, e in enumerate(z) if e >= maxz*alpha] for z, maxz in zip(zs, maxzs)]
 
 	# optimize
-	# init theta = 0
-	theta = gradient_descent(init, Ss, zs, C, alphazs, eta, iters, verbose)
+	theta = gradient_descent(init, Ss, zs, C, alphazs, eta, iters, print_every)
 	
 	# get result
 	res = [f_theta(theta, t, C) for t in T]
