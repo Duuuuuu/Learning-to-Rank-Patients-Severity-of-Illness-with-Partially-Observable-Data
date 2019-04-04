@@ -9,12 +9,13 @@ def shuffle_data(X, Y):
 
 def f_theta(theta, Siy, C):
 	d = len(Siy)
-	CS = []
 	v = np.zeros(d)
 
 	# calculate v
+	print(Siy)
 	for j in range(d): # u
 		for i in range(d): # i
+			#if int(Siy[i]) == 1 and C[i][j] == 1:
 			if Siy[i] == 1 and j in C[i]:
 				v[j] = 1
 				break
@@ -31,7 +32,7 @@ def objective(theta, Ss, zs, C, alphazs):
 	N, m = len(Ss), len(Ss[0])
 	for i in range(N):
 		# calculate hinge loss
-		max_loss = 0 
+		max_loss = 0
 		phi = phi_theta(theta, Ss[i], C, alphazs[i])
 		for y in range(m):
 			max_loss = max(max((1 if y in alphazs[i] else 0) + \
@@ -45,7 +46,7 @@ def gradient_descent(theta, Ss, zs, C, alphazs, eta=0.01, iters=1000, verbose=Fa
 	for i in range(iters):
 		# gd
 		theta -= eta * gradident_fun(theta, Ss, zs, C, alphazs)
-		if verbose and i % 50 == 0:
+		if verbose and i % 20 == 0:
 			print('Iter %d : %s' % (i, theta))
 
 	return theta
@@ -58,13 +59,16 @@ def dops(X, Y, T, C, m, alpha, init, eta=0.01, iters=1000, verbose=False):
 	X, Y = shuffle_data(X, Y)
 	Ss = [X[i*m:(i+1)*m] for i in range(N)]
 	zs = [Y[i*m:(i+1)*m] for i in range(N)]
-	maxzs = [e.max() for e in zs] 
-	alphazs = [[i for i, e in enumerate(z) if e >= maxz/alpha] for z, maxz in zip(zs, maxzs)]
+	maxzs = [e.max() for e in zs]
+
+	for z, maxz in zip(zs,maxzs):
+
+	alphazs = [[i for i, e in enumerate(z) if e >= maxz * alpha] for z, maxz in zip(zs, maxzs)]
 
 	# optimize
 	# init theta = 0
 	theta = gradient_descent(init, Ss, zs, C, alphazs, eta, iters, verbose)
-	
+
 	# get result
 	res = [f_theta(theta, t, C) for t in T]
 	return res, theta, np.argmax(res)
