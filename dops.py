@@ -68,7 +68,7 @@ def sto_gradient_descent(theta, Ss, zs, C, alphazs, maxzs, batch_size=10, eta=0.
 	N = len(Ss)
 	for i in range(iters):
 		idx = batch_idx(i, batch_size, N)
-		gradient = obj_gradient(theta, Ss[idx], zs[idx], C, alphazs, lam, mu)
+		gradient = obj_gradient(theta, Ss[idx], zs[idx], C, alphazs[idx], lam, mu)
 		theta -= eta * gradient
 		if print_every > 0 and (i+1) % print_every == 0:
 			print('Iter %d, theta: %s, gradient: %s' % (i+1, theta, gradient))
@@ -92,8 +92,8 @@ def dops(X, Y, T, C, m, alpha, init, batch_size=10, eta=0.01, iters=1000, lam=1,
 	X, Y = shuffle_data(X, Y)
 	Ss = np.array([X[i*m:(i+1)*m] for i in range(N)])
 	zs = np.array([Y[i*m:(i+1)*m] for i in range(N)])
-	maxzs = [e.max() for e in zs]
-	alphazs = [np.array([1 if e >= maxz*alpha else 0 for e in z]) for z, maxz in zip(zs, maxzs)]
+	maxzs = np.array([e.max() for e in zs])
+	alphazs = np.array([np.array([1 if e >= maxz*alpha else 0 for e in z]) for z, maxz in zip(zs, maxzs)])
 
 	# optimize
 	theta = sto_gradient_descent(init, Ss, zs, C, alphazs, maxzs, batch_size, eta, iters, lam, mu, print_every)
