@@ -27,7 +27,7 @@ def phi_theta(theta, Si, C, alphaz):
 	return sum([f_theta(theta, Si[y], C) for y, e in enumerate(alphaz) if e == 1])/alphaz.sum()
 
 
-def objective(theta, Ss, zs, C, alphazs, lam=1):
+def objective(theta, Ss, zs, C, alphazs, lam=1, mu=1):
 	res = 0
 	N, m = len(Ss), len(Ss[0])
 	for i in range(N):

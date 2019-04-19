@@ -46,7 +46,7 @@ def obj_gradient(theta, Ss, zs, C, alphazs, lam=1, mu=1):
 		phi, grad_2 = phi_theta(theta, Ss[i], C, alphazs[i])
 		for y in range(m):
 			ft, v = f_theta(theta, Ss[i][y], C)
-			loss = max((1 if y in alphazs[i] else 0) + ft - phi, 0)
+			loss = max((1 if alphazs[i][y] == 1 else 0) + ft - phi, 0)
 			if loss > max_loss:
 				max_loss = loss
 				grad_1 = v
