@@ -60,7 +60,7 @@ def gradient_descent(theta, Ss, zs, C, alphazs, batch_size=10, eta=0.01, iters=1
 	return theta
 
 
-def dops(X, Y, T, C, m, alpha, init, batch_size=10, eta=0.01, iters=1000, lam=1, mu=1, print_every=10):
+def dops_prev(X, Y, T, C, m, alpha, init, batch_size=10, eta=0.01, iters=1000, lam=1, mu=1, print_every=10):
 	# config
 	M, d = X.shape
 	N = int(np.floor(M/m))
