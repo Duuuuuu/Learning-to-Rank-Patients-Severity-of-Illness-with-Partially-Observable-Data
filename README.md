@@ -6,3 +6,5 @@ TODO:
  3. ~~Explore how to incorporate multi-level coverage~~
  4. Think of other submodular applications of ICU dataset
  5. Understand the principles of DOPS
+ 6. explore other promising dataset
+ 7. ~~try "quantile loss"~~
