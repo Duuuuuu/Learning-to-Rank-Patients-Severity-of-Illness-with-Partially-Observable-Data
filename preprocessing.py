@@ -5,7 +5,7 @@ import pandas as pd
 
 def get_data(path):
     # -------------------- read ----------------------
-    with open('./Data/states_bpleq65.p','rb') as f:
+    with open(path,'rb') as f:
         states = pickle.load(f)
     patient_ids = list(states.keys())
 
@@ -264,6 +264,3 @@ def get_data(path):
 
 
     return x_train, y_train, bilevel_df, multilevel_df
-
-
-
