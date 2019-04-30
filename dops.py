@@ -47,7 +47,7 @@ def phi_theta(theta, Si, C, alphaz, cover_indices):
     return sum(res)/sum_alphaz, gradient/sum_alphaz
 
 
-def obj_gradient(theta, Ss, zs, C, alphazs, lam=1, mu=1, cover_indices=[]):
+def obj_gradient(theta, Ss, zs, C, alphazs, maxzs, lam=1, mu=1, cover_indices=[]):
     res = 0
     N, m = len(Ss), len(Ss[0])
     gradient = np.zeros_like(theta)
@@ -58,6 +58,7 @@ def obj_gradient(theta, Ss, zs, C, alphazs, lam=1, mu=1, cover_indices=[]):
         phi, grad_2 = phi_theta(theta, Ss[i], C, alphazs[i], cover_indices)
         for y in range(m):
             ft, v = f_theta(theta, Ss[i][y], C, cover_indices)
+            # loss = max((1 if ft < maxzs[i] else 0) + ft - phi, 0)
             loss = max((1 if alphazs[i][y] == 1 else 0) + ft - phi, 0)
             if loss > max_loss:
                 max_loss = loss
@@ -67,11 +68,11 @@ def obj_gradient(theta, Ss, zs, C, alphazs, lam=1, mu=1, cover_indices=[]):
     return (theta + lam * gradient/N - mu * np.ones_like(theta))/N
 
 
-def sto_gradient_descent(theta, Ss, zs, C, alphazs, batch_size=10, eta=0.01, iters=1000, lam=1, mu=1, print_every=10, cover_indices=[]):
+def sto_gradient_descent(theta, Ss, zs, C, alphazs, maxzs, batch_size=10, eta=0.01, iters=1000, lam=1, mu=1, print_every=10, cover_indices=[]):
     N = len(Ss)
     for i in range(iters):
         idx = batch_idx(i, batch_size, N)
-        gradient = obj_gradient(theta, Ss[idx], zs[idx], C, alphazs[idx], lam, mu, cover_indices)
+        gradient = obj_gradient(theta, Ss[idx], zs[idx], C, alphazs[idx], maxzs[idx], lam, mu, cover_indices)
         theta -= eta * gradient
         if print_every > 0 and (i+1) % print_every == 0:
             print('Iter %d, theta: %s, gradient: %s' % (i+1, theta, gradient))
@@ -86,16 +87,15 @@ def dops(X, Y, T, C, m, alpha, init, loss='approx', batch_size=10, eta=0.01, ite
     Ss = np.array([X[i*m:(i+1)*m] for i in range(N)])
     zs = np.array([Y[i*m:(i+1)*m] for i in range(N)])
     if loss == 'approx':
-        maxzs = np.array([z.max() for z in zs])
-        alphazs = np.array([np.array([1 if e >= maxz*alpha else 0 for e in z]) for z, maxz in zip(zs, maxzs)])
+        maxzs = np.array([z.max()*alpha for z in zs])
     elif loss == 'quantile':
-        quantilezs = np.array([np.percentile(z, alpha*100) for z in zs])
-        alphazs = np.array([np.array([1 if e >= quantilez else 0 for e in z]) for z, quantilez in zip(zs, quantilezs)])
+        maxzs = np.array([np.percentile(z, alpha*100) for z in zs])
     else:
         raise ValueError('loss function is None!')
+    alphazs = np.array([np.array([1 if e >= maxz else 0 for e in z]) for z, maxz in zip(zs, maxzs)])
 
     # optimize
-    theta = sto_gradient_descent(init, Ss, zs, C, alphazs, batch_size, eta, iters, lam, mu, print_every,cover_indices)
+    theta = sto_gradient_descent(init, Ss, zs, C, alphazs, maxzs, batch_size, eta, iters, lam, mu, print_every,cover_indices)
     if theta is None:
         raise ValueError('theta is None!')
 
