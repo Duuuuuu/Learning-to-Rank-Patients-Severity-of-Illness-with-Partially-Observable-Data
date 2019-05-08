@@ -3,13 +3,13 @@ import os
 slurm_template = """#!/bin/bash
 #SBATCH -t 1-23:59
 #SBATCH --mem=8000
-#SBATCH -p doshi-velez
+#SBATCH -p XXXX
 #SBATCH -o log.out
 #SBATCH -e err.out
 
 module load Anaconda3/5.0.1-fasrc02
-source activate jzdu
-python icu_dops.py {}
+source activate XXXX
+python learn.py {}
 """
 
 def launch_job(prefix='', drops=int, test_size=0.01, batch_size=32):
