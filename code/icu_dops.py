@@ -87,5 +87,7 @@ t2 = time.time()
 
 # save
 with open(FLAGS.savepath, 'wb') as f:
-    pickle.dump({'time':t2-t1, 'truth':truths, 'multi_preds':multi_preds, 'multi_preds_theta':multi_preds_theta}, f)
+    pickle.dump({'time':t2-t1, 'truth':truths, 'bi_preds':bi_preds, 'bi_preds_theta':bi_preds_theta, \
+                'multi_preds':multi_preds, 'multi_preds_theta':multi_preds_theta}, f)
+
 
